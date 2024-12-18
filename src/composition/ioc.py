@@ -63,6 +63,7 @@ class Container(containers.DeclarativeContainer):
         _verify_email_smtp_repo = _verify_email_smtp_repo,
         _role_postgres_repo = _role_postgres_repo,
         _user_role_postgres_repo = _user_role_postgres_repo,
+        _hashing_password_repo = _hashing_password_repo
     )
 
     login_user_service = providers.Factory(
@@ -70,6 +71,7 @@ class Container(containers.DeclarativeContainer):
             _access_and_refresh_jwt_repo = _access_and_refresh_jwt_repo,
             _user_postgres_repo = _user_postgres_repo,
             _user_role_postgres_repo = _user_role_postgres_repo,
-            _jwt_redis_repo = _jwt_redis_repo
+            _jwt_redis_repo = _jwt_redis_repo,
+            _hashing_password_repo = _hashing_password_repo
         
     )

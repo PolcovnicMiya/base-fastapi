@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import random
 
+from src.infrastructure.at.jwt.ports import HashingPasswordRepositoryPort
 from src.infrastructure.smtp.ports.verify_code import VerifyEmailSMTPRepositoryPort
 from src.application.auth.dto.register import SendRegisterCodeDTO, AcceptRegisterCodeDTO
 from src.infrastructure.db.postgres.ports import (
@@ -41,6 +42,7 @@ class AcceptRegisterCodeUseCase:
     _user_role_postgres_repo: UserRolePostgresRepositoryPort
     _email_code_redis_repo: EmailCodeRedisRepositoryPort
     _verify_email_smtp_repo: VerifyEmailSMTPRepositoryPort
+    _hashing_password_repo: HashingPasswordRepositoryPort
 
     async def __call__(self, dto: AcceptRegisterCodeDTO) -> None:
         existing_user = await self._user_postgres_repo.select_one_user_by_email(
@@ -53,11 +55,12 @@ class AcceptRegisterCodeUseCase:
 
         if not existing_code:
             raise AuthClientException(message="Verification code not found or expired!")
+        new_password = await self._hashing_password_repo.hash_password(dto.password)
 
         if dto.code != existing_code:
             raise AuthClientException(message="Code is invalid")
         user_id = await self._user_postgres_repo.insert_one_user(
-            email=dto.email, password=dto.password
+            email=dto.email, password=new_password
         )
 
         role_id = await self._role_postgres_repo.select_one_role_by_name(name="user")

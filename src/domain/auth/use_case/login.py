@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict
 from uuid import uuid4
 
+from src.infrastructure.at.jwt.ports import HashingPasswordRepositoryPort
 from src.application.auth.dto import CreateAccessAndRefreshTokenDTO,RefreshAccessTokenDTO
 from src.infrastructure.db.postgres.ports import (
     UserPostgresRepositoryPort,
@@ -20,14 +21,16 @@ class CreateAccessAndRefreshTokenUseCase:
     _user_postgres_repo: UserPostgresRepositoryPort
     _user_role_postgres_repo: UserRolePostgresRepositoryPort
     _jwt_redis_repo: JWTRedisRepositoryPort
+    _hashing_password_repo: HashingPasswordRepositoryPort
 
     async def __call__(self, dto: CreateAccessAndRefreshTokenDTO)->Dict[str, str] | None:
         existing_user = await self._user_postgres_repo.select_one_user_by_email(dto.email)
         if existing_user is None:
             raise AuthClientException(message="User does not Exist!")
-        if existing_user['password'] != dto.password:
+        
+
+        if not await self._hashing_password_repo.validate_password(password=dto.password, hashed_password=existing_user["password"].encode('utf-8')):
             raise AuthClientException(message="Invalid password!")
-        print (existing_user['id'])
         role_id = await self._user_role_postgres_repo.select_one_user_by_user_id(
             existing_user["id"]
         )

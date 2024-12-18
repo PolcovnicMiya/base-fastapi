@@ -4,11 +4,12 @@ from src.infrastructure.at.jwt.ports import HashingPasswordRepositoryPort
 
 
 class HashingPasswordRepositoryAdapter(HashingPasswordRepositoryPort):
-    async def hash_password(self, password: str) -> bytes:
+    async def hash_password(self, password: str) -> str:
         salt = bcrypt.gensalt()
         pwd_bytes: bytes = password.encode()
-        return bcrypt.hashpw(pwd_bytes, salt)
-
+        password = bcrypt.hashpw(pwd_bytes, salt)
+        return password.decode("utf-8")
+    
     async def validate_password(self, password: str, hashed_password: bytes) -> bool:
         return bcrypt.checkpw(
             password=password.encode(),

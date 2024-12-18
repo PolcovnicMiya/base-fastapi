@@ -1,3 +1,2 @@
 from .common import AuthClientException, AuthServerException
-
-__all__ = ['AuthServerException', 'AuthClientException']
+__all__ = ["AuthServerException", "AuthServerException"]

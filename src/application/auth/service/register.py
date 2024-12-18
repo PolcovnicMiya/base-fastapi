@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
+from src.infrastructure.at.jwt.ports import HashingPasswordRepositoryPort
 from src.application.auth.dto import SendRegisterCodeDTO, AcceptRegisterCodeDTO
 from src.domain.auth.use_case import SendRegisterCodeUseCase, AcceptRegisterCodeUseCase
 from src.infrastructure.db.postgres.ports import (
@@ -20,6 +21,7 @@ class RegisterUserService(RegisterUserServiceInterface):
     _verify_email_smtp_repo: VerifyEmailSMTPRepositoryPort
     _role_postgres_repo: RolePostgresRepositoryPort
     _user_role_postgres_repo: UserRolePostgresRepositoryPort
+    _hashing_password_repo: HashingPasswordRepositoryPort
 
     async def send_register_code(self, dto: SendRegisterCodeDTO)-> Dict[str, str]:
         use_case = SendRegisterCodeUseCase(
@@ -36,6 +38,7 @@ class RegisterUserService(RegisterUserServiceInterface):
             _user_postgres_repo = self._user_postgres_repo,
             _user_role_postgres_repo = self._user_role_postgres_repo,
             _email_code_redis_repo = self._email_code_redis_repo,
-            _verify_email_smtp_repo = self._verify_email_smtp_repo
+            _verify_email_smtp_repo = self._verify_email_smtp_repo,
+            _hashing_password_repo = self._hashing_password_repo
         )
         await use_case(dto=dto)
